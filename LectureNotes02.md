@@ -1,6 +1,6 @@
 # [Go编程时光](https://golang.iswbm.com/)面向对象
 
-## 结构体与继承
+## 一、结构体与继承
 
 Go语言的结构体`struct`即相当于其他语言的类`class`，是一种多个类型的变量组合在一起的聚合数据类型。结构体没有继承。
 
@@ -228,7 +228,7 @@ func main() {
 }
 ```
 
-## 接口和多态
+## 二、接口和多态
 
 在面向对象领域，**接口定义一个对象的行为**。接口只规定了对象应该做什么，实现细节应该由对象本身去决定。
 
@@ -337,7 +337,7 @@ func calculateAllPrice(goods []Good) int {
 }
 ```
 
-## 结构体中的Tag用法
+## 三、结构体中的Tag用法
 
 ### 1、Tag的用处
 
@@ -478,4 +478,116 @@ func Print(obj interface{}) error {
 }
 ```
 
-## 类型断言
+## 四、类型断言
+
+### Type Assertion
+
+类型断言主要做以下两件事：
+
+1. 检查`i`是否为`nil`
+2. 检查`i`存储的是否为某个类型
+
+使用方法有两种：
+
+**第一种：**
+
+```go
+t := i.(T)
+```
+
+这个表达式可以断言一个接口对象`i`里不是 `nil`，并且接口对象`i`存储的值的类型是`T`，如果断言成功，就会**返回值**给`t`，如果断言失败，就会触发`panic`。如下例：
+
+```go
+func main() {
+    var i interface{} = 10
+    t1 := i.(int)
+    fmt.Println(t1)
+
+    t2 := i.(string)
+    fmt.Print(t2)
+
+    var i2 interface{} // nil
+    var t3 = i.(interface{})
+}
+```
+
+上述`t1`会获得对应的值，`t2`运行时会失败，并触发`panic`，`t3`由于接口值是`nil`，也会触发`panic`。
+
+**第二种：**
+
+```go
+t, ok := i.(T)
+```
+
+与第一种方法相同，这个表达式也可以进行类型断言。如果断言成功，`ok`的值就是`true`，如果断言失败，`ok`的值为false，`t`为对应类型的零值，且不会触发`panic`。
+
+```go
+func main() {
+    var i interface{} = 10
+    t1, ok := i.(int)
+    fmt.Printf("%d-%t\n", t1, ok)
+
+    t2, ok := i.(string)
+    fmt.Printf("%s-%t\n", t2, ok)
+
+    var k interface{} // nil
+    t3, ok := k.(interface{})
+    fmt.Println(t3, "-", ok)
+
+    t4, ok := k.(interface{})
+    fmt.Printf("%d-%t\n", t4, ok)
+
+    t5, ok := k.(int)
+    fmt.Printf("%d-%t\n", t5, ok)
+}
+```
+
+### Type Switch
+
+如果需要区分多种类型，可以使用`type switch`，这种方法比一个一个进行类型断言更简单。
+
+```go
+package main
+
+import "fmt"
+
+func findType(i interface{}) {
+    switch x := i.(type) {
+    case int:
+        fmt.Println(x, "is int")
+    case string:
+        fmt.Println(x, "is string")
+    case nil:
+        fmt.Println(x, "is nil")
+    default:
+        fmt.Println(x, "not type matched")
+    }
+}
+
+func main() {
+    findType(10)      // int
+    findType("hello") // string
+
+    var k interface{} // nil
+    findType(k)
+
+    findType(10.23) //float64
+}
+```
+
+几点需要注意的问题：
+
+* 如果要断定的值是`nil`，则会匹配`case nill`
+* 如果值在`switch-case`中没有匹配的类型，就会进入`default`分支
+* 类型断言，仅能对静态类型为空接口(interface{})的对象进行断言，否则会抛出错误
+* 类型断言完成后，实际上会返回静态类型为你断言的类型的对象，而要清楚原来的静态类型为空接口类型(interface{})，这是Go的隐式类型转换
+
+**详细内容可以参考：**
+
+[Explain Type Assertions in GO](https://stackoverflow.com/questions/38816843/explain-type-assertions-in-go)
+
+[Go interface详解(四)：类型断言](https://sanyuesha.com/2017/12/01/go-interface-4/)
+
+## 五、空接口
+
+
