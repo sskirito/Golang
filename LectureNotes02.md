@@ -590,4 +590,132 @@ func main() {
 
 ## 五、空接口
 
+### 1、空接口的定义
 
+空接口没有定义任何方法，因此可以说所有类型都实现了空接口。
+
+```go
+type empty_interface interface {
+
+}
+```
+
+每一个接口都包含两个属性，一个是值，一个是类型。对于空接口来说，两者都是`nil`，可以用`fmt`来验证：
+
+```go
+func main() {
+    var i interface{}
+    fmt.Printf("type: %T, value: %v", i, i)
+}
+```
+
+### 2、空接口的用法
+
+**第一种：** 直接使用`interface{}`作为类型声明一个实例，这个实例可以承载任意类型的值：
+
+```go
+func main() {
+    var i interface{}
+
+    i = 1
+    fmt.Pritln(i)
+    i = "Hello"
+    fmt.Println(i)
+    i = false
+    fmt.Println(i)
+}
+```
+
+**第二种：** 使用空接口可以让函数能够接收任意类型的值。
+
+```go
+func print(anyType interface{}) {
+    fmt.Println(anyType)
+}
+func main() {
+    a := 10
+    b := "Hello:"
+    c := true
+    print(a)
+    print(b)
+    print(c)
+}
+```
+
+接收多个任意类型的值：
+
+```go
+func print(anyTypes ...interface{}) {
+    for _, anyType := range anyTypes {
+        fmt.Println(anyType)
+    }
+}
+func main() {
+    a := 10
+    b := "Hello"
+    c := true
+    print(a, b, c)
+}
+```
+
+**第三种：** 定义一个接收任意类型的数组、切片、哈希表、结构体：
+
+```go
+func main() {
+    anyType := make([]interface{}, 5)
+    any[0] = 11
+    any[1] = "Hello"
+    any[2] = []int{1, 2, 3, 4}
+    for _, value := range anyType {
+        fmt.Println(value)
+    }
+}
+```
+
+### 3、空接口使用的注意点
+
+**空接口可以承载任意值，但不代表任意类型就可以承接空接口类型的值。**
+
+不能将一个空接口类型的对象，再赋值给一个固定类型（比如int, string等）
+
+```go
+func main() {
+    var a int = 1
+    var i interface{} = a
+    var b int = i
+}
+// 报错 cannot use i (type interface {}) as type int in assignment: need type assertion
+```
+
+**当空接口承载数组和切片后，该对象无法在进行切片。**
+
+```go
+func main() {
+    slice := []int{2, 3, 5, 7, 11, 13}
+    var i interface{}
+    i = slice
+    g := i[1:3]
+    // 报错 cannot slice i (type interface {})
+}
+```
+
+**当使用空接口来接收任意类型的参数时，它的静态类型是`interface{}`，但动态类型未知，需要使用类型断言。**
+
+```go
+func print(i interface{}) {
+    switch i.(type) {
+        case int:
+            fmt.Println("int")
+        case string:
+            fmt.Println("string")
+        default:
+            fmt.Println("Other")
+    }
+}
+func main() {
+    a := 10
+    b := "Hello"
+    print(a)
+    print(b)
+}
+```
